@@ -1,102 +1,100 @@
-# The example function below keeps track of the opponent's history and plays whatever the opponent played two plays ago. It is not a very good player so you will need to change the code to pass the challenge.
+user_moves = []
+starting_move = last_move = 'S'
+detected_bots = [False, False, False, False]
+counter_moves = {'P': 'R', 'R': 'S', 'S': 'P'}
+quincy_index = -1
+move_sequence = [{
+    "RR": 0, 
+    "RP": 0, 
+    "RS": 0, 
+    "PR": 0, 
+    "PP": 0, 
+    "PS": 0, 
+    "SR": 0, 
+    "SP": 0, 
+    "SS": 0, 
+}]
 
-my_history = []
-init_play = prev_play = 'S'
-opponent_list = [False, False, False, False]
-ideal_response = {'P' : 'R', 'R' : 'S', 'S' : 'P'}
-opponent_quincy_counter = -1
-play_order = [{
-    "RR" : 0, 
-    "RP" : 0, 
-    "RS" : 0, 
-    "PR" : 0, 
-    "PP" : 0, 
-    "PS" : 0, 
-    "SR" : 0, 
-    "SP" : 0, 
-    "SS" : 0, 
-    }]
-
-def player(prev_opponent_play, opponent_history = []):
-    global my_history, prev_play, opponent_list, ideal_response, opponent_quincy_counter, play_order
-    opponent_history.append(prev_opponent_play)
-    my_history.append(prev_play)
-
-  
-    if(len(set(opponent_list)) == 1 and opponent_history[-5:] == ['R', 'P', 'P', 'S', 'R']):
-        opponent_list[0] = True
-
-    if(opponent_list[0]):
-        if(len(opponent_history) % 1000 == 0):
-            opponent_list = [False, False, False, False]
-            opponent_history.clear()
-            
-        opponent_quincy_list = ['P', 'S', 'S', 'R', 'P'] 
-        opponent_quincy_counter = (opponent_quincy_counter + 1) % 5
-        return opponent_quincy_list[opponent_quincy_counter]
+def player(opponent_last_move, opponent_moves = []):
+    global user_moves, last_move, detected_bots, counter_moves, quincy_index, move_sequence
     
+    opponent_moves.append(opponent_last_move)
+    user_moves.append(last_move)
     
-    if(len(set(opponent_list)) == 1 and opponent_history[-5:] == ['P', 'P', 'R', 'R', 'R']):
-        opponent_list[1] = True
+    # Detecting first bot (Quincy)
+    if(len(set(detected_bots)) == 1 and opponent_moves[-5:] == ['R', 'P', 'P', 'S', 'R']):
+        detected_bots[0] = True
 
-    if(opponent_list[1]): 
-        last_two = ''.join(my_history[-2:])
-        if(len(last_two) == 2):
-            play_order[0][last_two] += 1
-        potential_plays = [
-            prev_play + 'R', 
-            prev_play + 'P', 
-            prev_play + 'S', 
-            ]
-        sub_order = {
-            k : play_order[0][k]
-            for k in potential_plays if k in play_order[0]
-            }
-        prediction = max(sub_order, key = sub_order.get)[-1:]
+    if detected_bots[0]:
+        if len(opponent_moves) % 1000 == 0:
+            detected_bots = [False, False, False, False]
+            opponent_moves.clear()
+
+        quincy_moves = ['P', 'S', 'S', 'R', 'P']
+        quincy_index = (quincy_index + 1) % 5
+        return quincy_moves[quincy_index]
+
+    # Detecting second bot
+    if len(set(detected_bots)) == 1 and opponent_moves[-5:] == ['P', 'P', 'R', 'R', 'R']:
+        detected_bots[1] = True
+
+    if detected_bots[1]:
+        last_two_moves = ''.join(user_moves[-2:])
+        if len(last_two_moves) == 2:
+            move_sequence[0][last_two_moves] += 1
+
+        next_possible_moves = [
+            last_move + 'R', 
+            last_move + 'P', 
+            last_move + 'S',
+        ]
         
-        if(len(opponent_history) % 1000 == 0):
-            opponent_list = [False, False, False, False]
-            opponent_history.clear()
-            play_order = [{
-              "RR" : 0, 
-              "RP" : 0, 
-              "RS" : 0, 
-              "PR" : 0, 
-              "PP" : 0, 
-              "PS" : 0, 
-              "SR" : 0, 
-              "SP" : 0, 
-              "SS" : 0, 
-              }]
+        prediction_counts = {k: move_sequence[0][k] for k in next_possible_moves if k in move_sequence[0]}
+        predicted_move = max(prediction_counts, key=prediction_counts.get)[-1:]
+        
+        if len(opponent_moves) % 1000 == 0:
+            detected_bots = [False, False, False, False]
+            opponent_moves.clear()
+            move_sequence = [{
+                "RR": 0, 
+                "RP": 0, 
+                "RS": 0, 
+                "PR": 0, 
+                "PP": 0, 
+                "PS": 0, 
+                "SR": 0, 
+                "SP": 0, 
+                "SS": 0, 
+            }]
+        
+        last_move = counter_moves[predicted_move]
+        return last_move
 
-        prev_play = ideal_response[prediction]
-        return prev_play
+    # Detecting third bot
+    if len(set(detected_bots)) == 1 and opponent_moves[-5:] == ['P', 'R', 'R', 'R', 'R']:
+        detected_bots[2] = True
 
-    
-    if(len(set(opponent_list)) == 1 and opponent_history[-5:] == ['P', 'R', 'R', 'R', 'R']):
-        opponent_list[2] = True
+    if detected_bots[2]:
+        if len(opponent_moves) % 1000 == 0:
+            detected_bots = [False, False, False, False]
+            opponent_moves.clear()
 
-    if(opponent_list[2]):
-        if(len(opponent_history) % 1000 == 0):
-            opponent_list = [False, False, False, False]
-            opponent_history.clear()
-            
-        prev_play = ideal_response[prev_play]
-        return prev_play
+        last_move = counter_moves[last_move]
+        return last_move
 
-    
-    if(len(set(opponent_list)) == 1 and opponent_history[-5:] == ['R', 'R', 'R', 'R', 'R']):
-        opponent_list[3] = True
-    
-    if(opponent_list[3]):  
-        if(len(opponent_history) == 1000):
-            opponent_list = [False, False, False, False]
-            opponent_history.clear()
-            
-        last_ten = my_history[-10:]
-        most_frequent = max(set(last_ten), key = last_ten.count)
-        prev_play = ideal_response[most_frequent]
-        return prev_play
-    
-    prev_play = init_play
-    return prev_play
+    # Detecting fourth bot
+    if len(set(detected_bots)) == 1 and opponent_moves[-5:] == ['R', 'R', 'R', 'R', 'R']:
+        detected_bots[3] = True
+
+    if detected_bots[3]:
+        if len(opponent_moves) == 1000:
+            detected_bots = [False, False, False, False]
+            opponent_moves.clear()
+
+        recent_moves = user_moves[-10:]
+        most_common_move = max(set(recent_moves), key=recent_moves.count)
+        last_move = counter_moves[most_common_move]
+        return last_move
+
+    last_move = starting_move
+    return last_move

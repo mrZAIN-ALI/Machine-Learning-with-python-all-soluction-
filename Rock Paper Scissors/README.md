@@ -2,7 +2,7 @@ Here's a README template for your GitHub repository:
 
 ---
 
-# Rock, Paper, Scissors Bot
+# Rock, Paper, Scissors Bot (Soultion)
 
 This repository contains a Python implementation of a Rock, Paper, Scissors (RPS) bot that aims to win at least 60% of games against four different bots. The challenge is to create a strategy that adapts to the opponent's moves to maximize the win rate.
 

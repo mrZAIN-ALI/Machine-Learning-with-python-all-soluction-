@@ -1,7 +1,3 @@
-Here's a sample `README.md` for your GitHub repository:
-
----
-
 # Cat and Dog Image Classification using CNN
 
 This repository contains a solution to classify images of cats and dogs using a Convolutional Neural Network (CNN) implemented with TensorFlow 2.0 and Keras. The model is trained to achieve at least 63% accuracy on the validation set, with the potential to reach 70% for extra credit.
